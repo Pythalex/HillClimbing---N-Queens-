@@ -170,7 +170,7 @@ int valeur(list noeud) {
     return value;
 }
 
-list hillclimbing() {
+list hillclimbingbruteforce() {
     // Déclarations
     int coups = 0;
     list noeud_courant;
@@ -182,72 +182,71 @@ list hillclimbing() {
     // Initialisation
     std::cout << "Entrer dimension : ";
     std::cin >> dimensions;
-    noeud_courant = tirer_noeud_depart(dimensions);
+    int valeurNoeud = 1;
+    while (valeurNoeud != 0) {
+        noeud_courant = tirer_noeud_depart(dimensions);
 
-    // Climbing loop
-    while (true) {
-        // Affichage
-        system("clear"); // Effacer la console
-        std::cout << "Coups effectues : " << coups;
-        afficher_plateau(noeud_courant);
+        // Climbing loop
+        while (true) {
+            // Affichage
+            system("clear"); // Effacer la console
+            std::cout << "Coups effectues : " << coups;
+            afficher_plateau(noeud_courant);
 
-        // On calcule les noeuds adjacents au noeud courant
-        noeuds_adjacents = calculer_noeuds_adjacents(noeud_courant);
+            // On calcule les noeuds adjacents au noeud courant
+            noeuds_adjacents = calculer_noeuds_adjacents(noeud_courant);
 
-        // On parcourt les noeuds adjacents et on stocke les noeuds avec la meilleure valeur
-        for (int i = 0; i < noeuds_adjacents.size(); i++) {
-            // Si la valeur du noeud est meilleure que la valeur courante
-            if (valeur(noeuds_adjacents[i]) < valeur(noeud_courant)) {
-                // S'il existe déjà un noeud potentiel
-                if (noeuds_potentiels.size() > 0) {
-                    /* Si le nouveau noeud est meilleur, la liste des noeuds potentiels
-                    est vidée et on y stocke le nouveau noeud */
-                    if (valeur(noeuds_adjacents[i]) < valeur(noeuds_potentiels[0])) {
-                        noeuds_potentiels = { noeuds_adjacents[i] };
+            // On parcourt les noeuds adjacents et on stocke les noeuds avec la meilleure valeur
+            for (int i = 0; i < noeuds_adjacents.size(); i++) {
+                // Si la valeur du noeud est meilleure que la valeur courante
+                if (valeur(noeuds_adjacents[i]) < valeur(noeud_courant)) {
+                    // S'il existe déjà un noeud potentiel
+                    if (noeuds_potentiels.size() > 0) {
+                        /* Si le nouveau noeud est meilleur, la liste des noeuds potentiels
+                        est vidée et on y stocke le nouveau noeud */
+                        if (valeur(noeuds_adjacents[i]) < valeur(noeuds_potentiels[0])) {
+                            noeuds_potentiels = { noeuds_adjacents[i] };
+                        }
+                        /* Sinon si le nouveau noeud est de même valeur que les autres noeuds
+                        potentiels, on le rajoute juste à la liste */
+                        else if (valeur(noeuds_adjacents[i]) == valeur(noeuds_potentiels[0])) {
+                            noeuds_potentiels.push_back(noeuds_adjacents[i]);
+                        }
                     }
-                    /* Sinon si le nouveau noeud est de même valeur que les autres noeuds
-                    potentiels, on le rajoute juste à la liste */
-                    else if (valeur(noeuds_adjacents[i]) == valeur(noeuds_potentiels[0])) {
+                    /* Sinon le noeud est le premier potentiel et on initialise juste la liste avec
+                    ce noeud */
+                    else {
                         noeuds_potentiels.push_back(noeuds_adjacents[i]);
                     }
                 }
-                /* Sinon le noeud est le premier potentiel et on initialise juste la liste avec
-                ce noeud */
-                else {
-                    noeuds_potentiels.push_back(noeuds_adjacents[i]);
-                }
             }
-        }
 
-        // S'il n'y a pas de meilleur noeud adjacent, on retourne le courant
-        if (noeuds_potentiels.size() == 0) {
-            return noeud_courant;
-        }
-        // S'il y a plusieurs noeuds potentiels, on en tire un au hasard
-        else if (noeuds_potentiels.size() > 1) {
-            noeud_courant = noeuds_potentiels[rand() % noeuds_potentiels.size()];
-        }
-        // Sinon on garde le seul noeud potentiel comme courant
-        else {
-            noeud_courant = noeuds_potentiels[0];
-        }
+            // S'il n'y a pas de meilleur noeud adjacent, on retourne le courant
+            if (noeuds_potentiels.size() == 0) {
+                break;
+            }
+            // S'il y a plusieurs noeuds potentiels, on en tire un au hasard
+            else if (noeuds_potentiels.size() > 1) {
+                noeud_courant = noeuds_potentiels[rand() % noeuds_potentiels.size()];
+            }
+            // Sinon on garde le seul noeud potentiel comme courant
+            else {
+                noeud_courant = noeuds_potentiels[0];
+            }
 
-        coups++; // On incrémente le nombre de coups effectués
-        noeuds_potentiels = tableau(); // On réinitialise les noeuds potentiels
+            coups++; // On incrémente le nombre de coups effectués
+            noeuds_potentiels = tableau(); // On réinitialise les noeuds potentiels
+        }
+        valeurNoeud = valeur(noeud_courant);
     }
+    return noeud_courant;
 }
 
 int main() {
-    list noeud = hillclimbing();
+    list noeud = hillclimbingbruteforce();
     int valeurNoeud = valeur(noeud);
 
-    // Compte-rendu
-    if (valeurNoeud != 0) {
-        std::cout << "L'algorithme est tombé sur un minimum local de valeur : " << valeurNoeud;
-    }
-    else {
-        std::cout << "L'algorithme est tombé sur une solution !";
-    }
+    std::cout << "L'algorithme est tombé sur une solution !";
     std::cout << "\n\n";
     for (int i = 0; i < noeud.size(); i++) {
         std::cout << noeud[i] << " ";
